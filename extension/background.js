@@ -29,16 +29,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
-  if (msg.action === 'inject_and_capture') {
-    const tabId = msg.tabId || sender.tab?.id;
-    chrome.scripting.executeScript({ target: { tabId }, files: ['content_script.js'] })
-      .then(() => {
-        setTimeout(() => {
-          chrome.tabs.sendMessage(tabId, { action: 'capture_page' }, res => sendResponse(res));
-        }, 500);
-      }).catch(err => sendResponse({ error: err.message }));
-    return true;
-  }
+ if (msg.action === 'inject_and_capture') {
+  const tabId = msg.tabId || sender.tab?.id;
+  setTimeout(() => {
+    chrome.tabs.sendMessage(tabId, { action: 'capture_page' }, res => sendResponse(res));
+  }, 200);
+  return true;
+}
 
   if (msg.action === 'call_claude') {
     callAPI(msg.payload).then(r => sendResponse(r)).catch(err => sendResponse({ error: err.message }));
