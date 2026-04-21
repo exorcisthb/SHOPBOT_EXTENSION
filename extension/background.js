@@ -1,6 +1,6 @@
 // background.js - Service worker
 
-const PROXY_URL = 'https://shopbot-ai-fhss.onrender.com';
+const PROXY_URL = 'https://shopbot-ai-0vqw.onrender.com';
 const EXTENSION_SECRET = '69fde1581c521688a0ce3855023d5440';
 
 // Toggle widget when extension icon is clicked
