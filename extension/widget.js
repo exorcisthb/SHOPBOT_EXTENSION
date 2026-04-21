@@ -70,6 +70,23 @@
       font-family: 'Inter', sans-serif;
       padding: 0 4px;
     }
+    #sb-fab-close {
+      position: absolute;
+      top: -7px; left: -7px;
+      width: 18px; height: 18px;
+      background: #2a2a35;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #aaa;
+      font-size: 9px;
+      display: none;
+      align-items: center; justify-content: center;
+      cursor: pointer;
+      z-index: 2147483647;
+      line-height: 1;
+    }
+    #shopbot-root:hover #sb-fab-close { display: flex; }
+    #sb-fab-close:hover { background: #f87171; color: #fff; border-color: #f87171; }
 
     /* ── Panel ── */
     #sb-panel {
@@ -420,6 +437,7 @@
     <button id="sb-fab" title="ShopBot AI">
       🛍️
       <div id="sb-fab-badge"></div>
+      <div id="sb-fab-close" title="Ẩn ShopBot">✕</div>
     </button>
 
     <div id="sb-panel">
@@ -534,6 +552,14 @@
   let slots = [], chatHistory = [], isLoading = false, isOpen = false;
 
   // ============================================================
+  // FAB CLOSE (ẩn widget)
+  // ============================================================
+  document.getElementById('sb-fab-close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    root.style.display = 'none';
+  });
+
+  // ============================================================
   // FAB TOGGLE
   // ============================================================
   const fab   = document.getElementById('sb-fab');
@@ -620,7 +646,6 @@
     chrome.runtime.onMessage.addListener(progressListener);
 
     try {
-      // Ping content script
       let pingOk = false;
       try {
         pingOk = await new Promise(resolve => {
@@ -886,9 +911,9 @@
   });
   document.getElementById('sb-btn-reload').addEventListener('click', () => {
     chrome.storage.local.remove(['shopbot_chat'], () => {
-        chrome.runtime.sendMessage({ action: 'reload_extension' });
+      chrome.runtime.sendMessage({ action: 'reload_extension' });
     });
-});
+  });
 
   // ============================================================
   // STORAGE
