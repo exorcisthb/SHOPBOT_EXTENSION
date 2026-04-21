@@ -575,10 +575,19 @@
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.action === 'toggle_widget') {
-      isOpen = !isOpen;
-      panel.classList.toggle('open', isOpen);
-      fab.classList.toggle('open', isOpen);
-      if (isOpen) updatePageInfo();
+      // Nếu root đang bị ẩn (do bấm X), hiện lại và mở panel luôn
+      if (root.style.display === 'none') {
+        root.style.display = '';
+        isOpen = true;
+        panel.classList.add('open');
+        fab.classList.add('open');
+        updatePageInfo();
+      } else {
+        isOpen = !isOpen;
+        panel.classList.toggle('open', isOpen);
+        fab.classList.toggle('open', isOpen);
+        if (isOpen) updatePageInfo();
+      }
       sendResponse({ ok: true });
     }
   });
