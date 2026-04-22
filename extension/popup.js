@@ -67,8 +67,8 @@ function setupEventListeners() {
   // Settings
   document.getElementById('btn-clear-all').addEventListener('click', clearAllSlots);
   document.getElementById('btn-reload-ext').addEventListener('click', () => {
-    // Xóa chat history, giữ lại slots (ảnh sản phẩm)
-    chrome.storage.local.remove(['shopbot_chat'], () => {
+    if (!confirm('Reload extension sẽ xóa toàn bộ sản phẩm và lịch sử chat. Tiếp tục?')) return;
+    chrome.storage.local.clear(() => {
       chrome.runtime.reload();
     });
   });
@@ -362,9 +362,9 @@ async function sendMessage() {
         const slot = slots[i];
         productContext += `\nSẢN PHẨM ${i + 1}: ${slot.name}\n`;
         productContext += `Sàn: ${slot.platform}\n`;
-        productContext += `Giá: ${slot.price || 'Xem trong ảnh chụp màn hình'}\n`;
-        productContext += `Đánh giá: ${slot.rating || 'Xem trong ảnh chụp màn hình'}\n`;
-        productContext += `Đã bán: ${slot.sold || 'Xem trong ảnh chụp màn hình'}\n`;
+        productContext += `Giá: ${slot.price || 'N/A'}\n`;
+        productContext += `Đánh giá: ${slot.rating || 'N/A'}\n`;
+        productContext += `Đã bán: ${slot.sold || 'N/A'}\n`;
         productContext += `URL: ${slot.url}\n`;
       }
       userContentParts.push({ type: 'text', text: productContext });
