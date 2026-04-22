@@ -510,10 +510,10 @@
         <div class="sb-settings">
           <div class="sb-settings-section">
             <div class="sb-settings-label">Model AI</div>
-            <select class="sb-select" id="sb-model-select">
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Nhanh)</option>
-              <option value="gemini-2.5-pro">Gemini 2.5 Pro (Mạnh hơn)</option>
-              <option value="Gemma 3-12b-it">Gemma 3-12b-it</option>
+        <select class="sb-select" id="sb-model-select">
+              <option value="gemini-2.5-flash">⚡ Gemini 2.5 Flash</option>     
+              <option value="gemma-3-27b-it">🚀 Gemma 3 27B</option>
+              <option value="gemma-3-12b-it">🔬 Gemma 3 12B</option>
             </select>
           </div>
           <div class="sb-settings-section">
@@ -528,8 +528,8 @@
             <div class="sb-settings-label">Tương thích</div>
             <div class="sb-support-info">
               ✅ Shopee · Lazada · Tiki<br>
-              ✅ Amazon · eBay · AliExpress<br>
-              ✅ Taobao · Alibaba · Temu · Shein<br>
+              ✅ Amazon · eBay <br>
+              ✅ Taobao · Alibaba <br>
               ⚠️ Trang khác: chụp ảnh vẫn hoạt động
             </div>
           </div>
