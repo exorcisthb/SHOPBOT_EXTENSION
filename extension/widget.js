@@ -511,9 +511,10 @@
           <div class="sb-settings-section">
             <div class="sb-settings-label">Model AI</div>
             <select class="sb-select" id="sb-model-select">
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Nhanh)</option>
-              <option value="gemini-2.5-pro">Gemini 2.5 Pro (Mạnh hơn)</option>
-              <option value="Gemma 3-12b-it">Gemma 3-12b-it</option>
+              <option value="gemini-2.5-flash-preview-04-17">⚡ Gemini 2.5 Flash</option>
+              <option value="gemini-2.0-flash">🌟 Gemini 2.0 Flash</option>
+              <option value="gemma-3-27b-it">🚀 Gemma 3 27B</option>
+              <option value="gemma-3-12b-it">🔬 Gemma 3 12B</option>
             </select>
           </div>
           <div class="sb-settings-section">
@@ -525,12 +526,15 @@
             <button class="sb-btn-dev" id="sb-btn-reload">🔄 Reload Extension</button>
           </div>
           <div class="sb-settings-section">
-            <div class="sb-settings-label">Hỗ trợ sàn</div>
+            <div class="sb-settings-label">Tương thích</div>
             <div class="sb-support-info">
-              ✅ Shopee (shopee.vn)<br>
-              ✅ Lazada (lazada.vn)<br>
-              ✅ Tiki (tiki.vn)<br>
-              ⚠️ Trang khác có thể không capture đầy đủ
+              ✅ Shopee · Lazada · Tiki<br>
+              ✅ Amazon · eBay · AliExpress<br>
+              ✅ Taobao · Alibaba · Temu · Shein<br>
+              ⚠️ Trang khác: chụp ảnh vẫn hoạt động<br>
+              <span style="font-size:10px;color:var(--text3);line-height:1.7;display:block;margin-top:6px;">
+                ShopBot không liên kết hay được bảo lãnh bởi bất kỳ sàn thương mại nào. Extension hoạt động độc lập, chỉ đọc thông tin hiển thị công khai trên trình duyệt của bạn.
+              </span>
             </div>
           </div>
         </div>
@@ -831,7 +835,7 @@
       const parts = [];
       let ctx = '=== THÔNG TIN SẢN PHẨM ===\n';
       slots.forEach((s, i) => {
-        ctx += `\nSP${i+1}: ${s.name}\nSàn: ${s.platform}\nGiá: ${s.price||'N/A'}\nĐánh giá: ${s.rating||'N/A'}\nURL: ${s.url}\n`;
+        ctx += `\nSP${i+1}: ${s.name}\nSàn: ${s.platform}\nGiá: ${s.price||'Xem trong ảnh chụp màn hình'}\nĐánh giá: ${s.rating||'Xem trong ảnh chụp màn hình'}\nURL: ${s.url}\n`;
       });
       parts.push({ type: 'text', text: ctx });
 
@@ -919,8 +923,7 @@
     addBotMsg('🗑️ Đã xóa tất cả. Bạn có thể thêm sản phẩm mới!');
   });
   document.getElementById('sb-btn-reload').addEventListener('click', () => {
-    if (!confirm('Reload extension sẽ xóa toàn bộ sản phẩm và lịch sử chat. Tiếp tục?')) return;
-    chrome.storage.local.clear(() => {
+    chrome.storage.local.remove(['shopbot_chat'], () => {
       chrome.runtime.sendMessage({ action: 'reload_extension' });
     });
   });

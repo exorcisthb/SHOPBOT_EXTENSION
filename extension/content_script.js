@@ -33,8 +33,14 @@ function extractProductInfo() {
   else if (url.includes('sendo.vn')) platform = 'Sendo';
   else if (url.includes('amazon.')) platform = 'Amazon';
   else if (url.includes('ebay.')) platform = 'eBay';
+  else if (url.includes('aliexpress.')) platform = 'AliExpress';
+  else if (url.includes('alibaba.')) platform = 'Alibaba';
+  else if (url.includes('taobao.')) platform = 'Taobao';
+  else if (url.includes('tmall.')) platform = 'Tmall';
+  else if (url.includes('jd.com')) platform = 'JD';
+  else if (url.includes('temu.')) platform = 'Temu';
+  else if (url.includes('shein.')) platform = 'Shein';
   else {
-    // Lấy tên domain làm platform
     try { platform = new URL(url).hostname.replace('www.', ''); } catch(e) {}
   }
 
@@ -52,23 +58,42 @@ function extractProductInfo() {
       '[class*="price--main"]', '[class*="finalPrice"]',
       '[class*="sale-price"]', '[class*="salePrice"]',
       // Lazada
+      '.pdp-v2-product-price-content-salePrice-amount',
       '.pdp-price_type_normal', '.pdp-price', '.price-box',
       // Tiki
       '.product-price__current-price', '.product-price',
-      // Fallback
-      '[class*="price"]:not([class*="original"]):not([class*="label"]):not([class*="tag"])'
+      // Amazon
+      '.a-price-whole',
+      // Taobao / Tmall
+      '.price-value', '[class*="price-value"]',
+      // eBay
+      '.ux-textspans',
+      // Fallback chung
+      '[class*="price"]:not([class*="original"]):not([class*="label"]):not([class*="tag"]):not([class*="slash"])'
     ],
     rating: [
+      // Shopee
       '[class*="rating-stars__stars"]', '[class*="shopee-rating-stars"]',
       '[class*="rating--number"]', '[class*="ratingCount"]',
+      // Lazada
       '.pdp-review-summary__overall-rating',
+      // Tiki
       '.review-rating__point',
+      // Amazon
+      '.a-icon-alt', '[class*="a-star"]',
+      // eBay
+      '[class*="stars"]',
+      // Fallback
       '[class*="rating"]', '[class*="Rating"]', '[class*="star"]'
     ],
     sold: [
+      // Shopee
       '[class*="sold"]', '[class*="Sold"]',
-      '[class*="historical_sold"]', '[class*="sales"]',
-      '[class*="quantity_sold"]'
+      '[class*="historical_sold"]',
+      // Tiki
+      '[class*="quantity_sold"]',
+      // Generic
+      '[class*="sales"]', '[class*="sold-count"]'
     ]
   };
 
