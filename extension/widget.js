@@ -372,36 +372,36 @@
     .sb-send:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── Settings View ── */
-    .sb-settings { padding: 14px; flex: 1; overflow-y: auto; }
-    .sb-settings-section { margin-bottom: 20px; }
+    .sb-settings { padding: 10px 14px; flex: 1; overflow-y: auto; }
+    .sb-settings-section { margin-bottom: 12px; }
     .sb-settings-label {
-      font-size: 11px; color: var(--text3);
-      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+      font-size: 10px; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
     }
     .sb-select {
       width: 100%; background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 10px; padding: 9px 12px;
+      border-radius: 10px; padding: 8px 12px;
       color: var(--text); font-size: 13px; outline: none;
       font-family: 'Inter', sans-serif; cursor: pointer; transition: border-color 0.15s;
     }
     .sb-select:focus { border-color: var(--accent); }
     .sb-select option { background: #1a1a22; }
     .sb-btn-danger {
-      width: 100%; padding: 9px; background: transparent;
+      width: 100%; padding: 8px; background: transparent;
       border: 1px solid rgba(248,113,113,0.28); border-radius: 10px;
       color: var(--red); font-size: 12px; cursor: pointer;
       transition: all 0.15s; font-family: 'Inter', sans-serif;
     }
     .sb-btn-danger:hover { background: rgba(248,113,113,0.08); }
     .sb-btn-dev {
-      width: 100%; padding: 9px; background: transparent;
+      width: 100%; padding: 8px; background: transparent;
       border: 1px solid rgba(167,139,250,0.28); border-radius: 10px;
-      color: #a78bfa; font-size: 12px; cursor: pointer; margin-top: 8px;
+      color: #a78bfa; font-size: 12px; cursor: pointer; margin-top: 6px;
       transition: all 0.15s; font-family: 'Inter', sans-serif;
     }
     .sb-btn-dev:hover { background: rgba(167,139,250,0.08); }
     .sb-support-info {
-      font-size: 12px; color: var(--text2); line-height: 1.9;
+      font-size: 11.5px; color: var(--text2); line-height: 1.7;
     }
 
     /* ── Preview overlay ── */
