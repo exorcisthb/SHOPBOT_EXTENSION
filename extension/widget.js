@@ -1,6 +1,6 @@
 // widget.js - ShopBot floating widget
 
-(function () {
+(function() {
   if (document.getElementById('shopbot-root')) return;
 
   // ============================================================
@@ -510,8 +510,8 @@
         <div class="sb-settings">
           <div class="sb-settings-section">
             <div class="sb-settings-label">Model AI</div>
-       <select class="sb-select" id="sb-model-select">
-  <option value="gemini-2.5-flash-preview-04-17">⚡ Gemini 2.5 Flash</option>
+           <select class="sb-select" id="sb-model-select">
+  <option value="gemini-2.5-flash">⚡ Gemini 2.5 Flash</option>
   <option value="gemini-2.0-flash">🌟 Gemini 2.0 Flash</option>
   <option value="gemma-3-27b-it">🚀 Gemma 3 27B</option>
   <option value="gemma-3-12b-it">🔬 Gemma 3 12B</option>
@@ -563,7 +563,7 @@
   // ============================================================
   // FAB TOGGLE
   // ============================================================
-  const fab = document.getElementById('sb-fab');
+  const fab   = document.getElementById('sb-fab');
   const panel = document.getElementById('sb-panel');
 
   fab.addEventListener('click', () => {
@@ -618,13 +618,13 @@
   // PAGE INFO
   // ============================================================
   function updatePageInfo() {
-    const url = window.location.href;
+    const url   = window.location.href;
     const title = document.title || '';
     let platform = 'Web', badgeClass = 'sb-badge-other';
-    if (url.includes('shopee.vn')) { platform = 'Shopee'; badgeClass = 'sb-badge-shopee'; }
-    else if (url.includes('lazada.vn')) { platform = 'Lazada'; badgeClass = 'sb-badge-lazada'; }
-    else if (url.includes('tiki.vn')) { platform = 'Tiki'; badgeClass = 'sb-badge-tiki'; }
-    else { try { platform = new URL(url).hostname.replace('www.', ''); } catch (e) { } }
+    if      (url.includes('shopee.vn'))  { platform = 'Shopee'; badgeClass = 'sb-badge-shopee'; }
+    else if (url.includes('lazada.vn'))  { platform = 'Lazada'; badgeClass = 'sb-badge-lazada'; }
+    else if (url.includes('tiki.vn'))    { platform = 'Tiki';   badgeClass = 'sb-badge-tiki'; }
+    else { try { platform = new URL(url).hostname.replace('www.', ''); } catch(e){} }
 
     const badge = document.getElementById('sb-platform-badge');
     badge.className = `sb-badge ${badgeClass}`;
@@ -661,7 +661,7 @@
         pingOk = await new Promise(resolve => {
           chrome.runtime.sendMessage({ action: 'ping_tab' }, res => resolve(res?.ok === true));
         });
-      } catch (e) { }
+      } catch(e) {}
 
       const captureResult = await new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({ action: 'inject_and_capture', tabId: null }, res => {
@@ -691,12 +691,12 @@
       await saveSlots();
       renderSlots();
       updateSlotCount();
-      addBotMsg(`✅ Đã lưu <strong>${slot.name.slice(0, 40)}${slot.name.length > 40 ? '...' : ''}</strong> (${slot.platform})`);
+      addBotMsg(`✅ Đã lưu <strong>${slot.name.slice(0,40)}${slot.name.length>40?'...':''}</strong> (${slot.platform})`);
 
       const fabBadge = document.getElementById('sb-fab-badge');
       fabBadge.textContent = slots.length;
       fabBadge.style.display = 'inline-flex';
-    } catch (err) {
+    } catch(err) {
       addBotMsg(`❌ Lỗi: ${err.message}`);
     } finally {
       chrome.runtime.onMessage.removeListener(progressListener);
@@ -715,9 +715,9 @@
         canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext('2d');
         const aspect = img.width / img.height;
-        let sx = 0, sy = 0, sw = img.width, sh = img.height;
-        if (aspect > 1) { sw = img.height; sx = (img.width - sw) / 2; }
-        else { sh = img.width; sy = (img.height - sh) / 2; }
+        let sx=0, sy=0, sw=img.width, sh=img.height;
+        if (aspect > 1) { sw = img.height; sx = (img.width-sw)/2; }
+        else             { sh = img.width;  sy = (img.height-sh)/2; }
         ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
         resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
@@ -738,13 +738,13 @@
     el.innerHTML = slots.map((s, i) => `
       <div class="sb-slot-item">
         ${s.thumbnail
-        ? `<img class="sb-slot-thumb" src="${s.thumbnail}" data-preview="${i}">`
-        : `<div class="sb-slot-thumb-ph">🛍️</div>`}
+          ? `<img class="sb-slot-thumb" src="${s.thumbnail}" data-preview="${i}">`
+          : `<div class="sb-slot-thumb-ph">🛍️</div>`}
         <div class="sb-slot-info">
           <div class="sb-slot-name">${esc(s.name)}</div>
           <div class="sb-slot-meta">
             <span class="sb-badge ${getPlatformClass(s.platform)}" style="font-size:10px;padding:1px 5px">${s.platform}</span>
-            ${s.price ? `<span class="sb-slot-price"> ${esc(s.price.slice(0, 20))}</span>` : ''}
+            ${s.price ? `<span class="sb-slot-price"> ${esc(s.price.slice(0,20))}</span>` : ''}
           </div>
           <div class="sb-slot-meta" style="margin-top:2px;font-size:10px;color:var(--text3)">${s.capturedAt}</div>
         </div>
@@ -773,9 +773,9 @@
   }
 
   function getPlatformClass(p) {
-    if (p === 'Shopee') return 'sb-badge-shopee';
-    if (p === 'Lazada') return 'sb-badge-lazada';
-    if (p === 'Tiki') return 'sb-badge-tiki';
+    if (p==='Shopee') return 'sb-badge-shopee';
+    if (p==='Lazada') return 'sb-badge-lazada';
+    if (p==='Tiki')   return 'sb-badge-tiki';
     return 'sb-badge-other';
   }
 
@@ -797,7 +797,7 @@
   document.getElementById('sb-input').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
   });
-  document.getElementById('sb-input').addEventListener('input', function () {
+  document.getElementById('sb-input').addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 80) + 'px';
   });
@@ -811,7 +811,7 @@
 
   async function sendMsg() {
     const input = document.getElementById('sb-input');
-    const text = input.value.trim();
+    const text  = input.value.trim();
     if (!text || isLoading) return;
     input.value = ''; input.style.height = 'auto';
     document.querySelectorAll('.sb-tab')[1].click();
@@ -832,7 +832,7 @@
       const parts = [];
       let ctx = '=== THÔNG TIN SẢN PHẨM ===\n';
       slots.forEach((s, i) => {
-        ctx += `\nSP${i + 1}: ${s.name}\nSàn: ${s.platform}\nGiá: ${s.price || 'N/A'}\nĐánh giá: ${s.rating || 'N/A'}\nURL: ${s.url}\n`;
+        ctx += `\nSP${i+1}: ${s.name}\nSàn: ${s.platform}\nGiá: ${s.price||'N/A'}\nĐánh giá: ${s.rating||'N/A'}\nURL: ${s.url}\n`;
       });
       parts.push({ type: 'text', text: ctx });
 
@@ -840,7 +840,7 @@
         slots.forEach(s => {
           if (s.imageData?.startsWith('data:image')) {
             const base64 = s.imageData.split(',')[1];
-            const mime = s.imageData.includes('jpeg') ? 'image/jpeg' : 'image/png';
+            const mime   = s.imageData.includes('jpeg') ? 'image/jpeg' : 'image/png';
             parts.push({ type: 'image', source: { type: 'base64', media_type: mime, data: base64 } });
           }
         });
@@ -857,7 +857,7 @@
             model,
             system: `Bạn là ShopBot - trợ lý so sánh sản phẩm chuyên nghiệp trên Shopee, Lazada, Tiki. Phân tích ảnh chụp màn hình sản phẩm và đưa ra tư vấn mua hàng chính xác. Trả lời bằng tiếng Việt, ngắn gọn, dễ hiểu. KHÔNG dùng markdown.`,
             messages: [
-              ...chatHistory.slice(0, -1).slice(-6).map(m => ({ role: m.role, content: m.content })),
+              ...chatHistory.slice(0,-1).slice(-6).map(m => ({ role: m.role, content: m.content })),
               { role: 'user', content: parts }
             ]
           }
@@ -871,7 +871,7 @@
       addBotMsg(fmt(res.text));
       chatHistory.push({ role: 'assistant', content: res.text });
       saveChatHistory();
-    } catch (err) {
+    } catch(err) {
       typing.remove();
       addBotMsg(`❌ Lỗi: ${err.message}`);
     } finally {
@@ -881,7 +881,7 @@
   }
 
   function fmt(t) {
-    return t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+    return t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
   }
   function addUserMsg(text) {
     const c = document.getElementById('sb-messages');
@@ -909,7 +909,7 @@
   // ============================================================
   // SETTINGS
   // ============================================================
-  document.getElementById('sb-model-select').addEventListener('change', function () {
+  document.getElementById('sb-model-select').addEventListener('change', function() {
     chrome.storage.local.set({ shopbot_model: this.value });
   });
   document.getElementById('sb-btn-clear').addEventListener('click', async () => {
@@ -957,6 +957,6 @@
   // ============================================================
   // UTILS
   // ============================================================
-  function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 })();
