@@ -362,9 +362,9 @@ async function sendMessage() {
         const slot = slots[i];
         productContext += `\nSẢN PHẨM ${i + 1}: ${slot.name}\n`;
         productContext += `Sàn: ${slot.platform}\n`;
-        productContext += `Giá: ${slot.price || 'N/A'}\n`;
-        productContext += `Đánh giá: ${slot.rating || 'N/A'}\n`;
-        productContext += `Đã bán: ${slot.sold || 'N/A'}\n`;
+        productContext += `Giá: ${slot.price || 'Xem trong ảnh chụp màn hình'}\n`;
+        productContext += `Đánh giá: ${slot.rating || 'Xem trong ảnh chụp màn hình'}\n`;
+        productContext += `Đã bán: ${slot.sold || 'Xem trong ảnh chụp màn hình'}\n`;
         productContext += `URL: ${slot.url}\n`;
       }
       userContentParts.push({ type: 'text', text: productContext });

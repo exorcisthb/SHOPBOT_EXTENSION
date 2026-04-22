@@ -43,19 +43,32 @@ function extractProductInfo() {
   // Selectors cho từng sàn
   const selectors = {
     price: [
-      // Shopee
-      '._3n5NQx', '.pqTWkA', '[class*="price"]', '[class*="Price"]',
+      // Shopee 2026
+      '.IZPeQz',
+      // Shopee cũ
+      '._3n5NQx', '.pqTWkA',
+      // Shopee generic
+      '[class*="mainPrice"]', '[class*="main-price"]',
+      '[class*="price--main"]', '[class*="finalPrice"]',
+      '[class*="sale-price"]', '[class*="salePrice"]',
       // Lazada
-      '.pdp-price', '.price-box',
+      '.pdp-price_type_normal', '.pdp-price', '.price-box',
       // Tiki
-      '.product-price', '[class*="price"]'
+      '.product-price__current-price', '.product-price',
+      // Fallback
+      '[class*="price"]:not([class*="original"]):not([class*="label"]):not([class*="tag"])'
     ],
     rating: [
-      '[class*="rating"]', '[class*="Rating"]', '[class*="star"]',
-      '.shopee-rating', '.pdp-review-summary'
+      '[class*="rating-stars__stars"]', '[class*="shopee-rating-stars"]',
+      '[class*="rating--number"]', '[class*="ratingCount"]',
+      '.pdp-review-summary__overall-rating',
+      '.review-rating__point',
+      '[class*="rating"]', '[class*="Rating"]', '[class*="star"]'
     ],
     sold: [
-      '[class*="sold"]', '[class*="Sold"]', '[class*="sales"]'
+      '[class*="sold"]', '[class*="Sold"]',
+      '[class*="historical_sold"]', '[class*="sales"]',
+      '[class*="quantity_sold"]'
     ]
   };
 
@@ -63,7 +76,10 @@ function extractProductInfo() {
     for (const sel of list) {
       try {
         const el = document.querySelector(sel);
-        if (el && el.innerText.trim()) return el.innerText.trim();
+        if (el && el.innerText.trim()) {
+          const text = el.innerText.trim();
+          if (text.length > 0 && text.length < 50) return text;
+        }
       } catch (e) {}
     }
     return '';
