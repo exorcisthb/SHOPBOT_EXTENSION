@@ -38,7 +38,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.action === 'reload_extension') {
-    chrome.runtime.reload();
+    // Gửi lệnh reset UI về tất cả các tab đang chạy widget trước
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach(tab => {
+        chrome.tabs.sendMessage(tab.id, { action: 'reset_widget' }, () => {
+          // Bỏ qua lỗi nếu tab không có widget
+          chrome.runtime.lastError;
+        });
+      });
+      // Sau đó mới reload extension
+      setTimeout(() => chrome.runtime.reload(), 300);
+    });
+    sendResponse({ ok: true });
     return true;
   }
 
