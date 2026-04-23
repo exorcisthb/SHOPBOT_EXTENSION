@@ -479,7 +479,7 @@
             <div class="sb-progress-text" id="sb-progress-text">Đang chuẩn bị...</div>
           </div>
         </div>
-        <div class="sb-slots-header">Sản phẩm đã lưu (<span id="sb-slot-count">0</span>/5)</div>
+        <div class="sb-slots-header">Sản phẩm đã lưu (<span id="sb-slot-count">0</span>/3)</div>
         <div class="sb-slots-list" id="sb-slots-list">
           <div class="sb-empty"><div class="sb-empty-icon">📦</div>Chưa có sản phẩm nào.<br>Mở trang SP và bấm Chụp để thêm.</div>
         </div>
@@ -554,7 +554,7 @@
   // ============================================================
   // STATE
   // ============================================================
-  const MAX_SLOTS = 5;
+  const MAX_SLOTS = 3;
   let slots = [], chatHistory = [], isLoading = false, isOpen = false;
 
   // ============================================================
@@ -701,7 +701,7 @@
       await saveSlots();
       renderSlots();
       updateSlotCount();
-      addBotMsg(`✅ Đã lưu <strong>${slot.name.slice(0,40)}${slot.name.length>40?'...':''}</strong> (${slot.platform})`);
+      addBotMsg(`✅ Đã lưu <strong>${slot.name.slice(0,40)}${slot.name.length>40?'...':''}</strong> (${slot.platform})<br>📦 Đã lưu ${slots.length}/5 sản phẩm${slots.length >= MAX_SLOTS ? ' — <span style="color:var(--yellow)">Đã đủ slot!</span>' : ` — còn trống ${MAX_SLOTS - slots.length} slot`}`);
 
       const fabBadge = document.getElementById('sb-fab-badge');
       fabBadge.textContent = slots.length;
