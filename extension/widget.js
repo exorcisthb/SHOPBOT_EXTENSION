@@ -929,11 +929,15 @@
     document.getElementById('sb-messages').innerHTML = '';
     addBotMsg('🗑️ Đã xóa tất cả. Bạn có thể thêm sản phẩm mới!');
   });
- document.getElementById('sb-btn-reload').addEventListener('click', () => {
+ document.getElementById('sb-btn-reload').addEventListener('click', async () => {
     if (!confirm('Reset toàn bộ? Tất cả sản phẩm và lịch sử chat sẽ bị xóa.')) return;
-    chrome.storage.local.clear(() => {
-      chrome.runtime.sendMessage({ action: 'reload_extension' });
-    });
+    await chrome.storage.local.clear();
+    slots = []; chatHistory = []; window._sbImgSent = false;
+    renderSlots(); updateSlotCount(); updatePageInfo();
+    document.getElementById('sb-messages').innerHTML = '';
+    addBotMsg('🔄 Đã reset toàn bộ. Bạn có thể bắt đầu lại!');
+    // Chuyển về tab Chụp
+    document.querySelectorAll('.sb-tab')[0].click();
   });
 
   // ============================================================
