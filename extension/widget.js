@@ -643,8 +643,8 @@
 
     const btn = document.getElementById('sb-btn-capture');
     btn.disabled = slots.length >= MAX_SLOTS;
-    document.getElementById('sb-btn-capture-text').textContent =
-      slots.length >= MAX_SLOTS ? 'Đã đủ 5 sản phẩm' : 'Chụp trang này';
+   document.getElementById('sb-btn-capture-text').textContent =
+      slots.length >= MAX_SLOTS ? `Đã đủ ${MAX_SLOTS} sản phẩm` : 'Chụp trang này';
   }
 
   // ============================================================
