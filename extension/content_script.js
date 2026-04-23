@@ -46,68 +46,90 @@ function extractProductInfo() {
 
   const title = document.title || '';
 
-  // Selectors cho từng sàn
   const selectors = {
     price: [
-      // Shopee 2026
       '.IZPeQz',
-      // Shopee cũ
       '._3n5NQx', '.pqTWkA',
-      // Shopee generic
       '[class*="mainPrice"]', '[class*="main-price"]',
       '[class*="price--main"]', '[class*="finalPrice"]',
       '[class*="sale-price"]', '[class*="salePrice"]',
-      // Lazada
       '.pdp-v2-product-price-content-salePrice-amount',
       '.pdp-price_type_normal', '.pdp-price', '.price-box',
-      // Tiki
       '.product-price__current-price', '.product-price',
-      // Amazon
       '.a-price-whole',
-      // Taobao / Tmall
       '.price-value', '[class*="price-value"]',
-      // eBay
       '.ux-textspans',
-      // Fallback chung
       '[class*="price"]:not([class*="original"]):not([class*="label"]):not([class*="tag"]):not([class*="slash"])'
     ],
     rating: [
-      // Shopee
       '[class*="rating-stars__stars"]', '[class*="shopee-rating-stars"]',
       '[class*="rating--number"]', '[class*="ratingCount"]',
-      // Lazada
       '.pdp-review-summary__overall-rating',
-      // Tiki
       '.review-rating__point',
-      // Amazon
       '.a-icon-alt', '[class*="a-star"]',
-      // eBay
       '[class*="stars"]',
-      // Fallback
       '[class*="rating"]', '[class*="Rating"]', '[class*="star"]'
     ],
     sold: [
-      // Shopee
       '[class*="sold"]', '[class*="Sold"]',
       '[class*="historical_sold"]',
-      // Tiki
       '[class*="quantity_sold"]',
-      // Generic
       '[class*="sales"]', '[class*="sold-count"]'
+    ],
+    // Variants: màu sắc + kích cỡ
+    variants: [
+      // Shopee
+      '[class*="product-variation"]',
+      '[class*="variation-group"]',
+      '[class*="section-variation"]',
+      '[class*="variationGroup"]',
+      '[class*="flex-no-overflow"]',
+      // Lazada
+      '[class*="sku-prop"]',
+      '[class*="skuProp"]',
+      '[class*="product-sku"]',
+      // Tiki
+      '[class*="option-selector"]',
+      '[class*="ConfigurationSection"]',
+      // Amazon
+      '[id*="variation_"]',
+      '[class*="swatches"]',
+      // Generic
+      '[class*="variant"]', '[class*="Variant"]',
+      '[class*="attribute"]', '[class*="swatch"]'
     ]
   };
 
-  function trySelectors(list) {
+  function trySelectors(list, maxLen = 50) {
     for (const sel of list) {
       try {
         const el = document.querySelector(sel);
         if (el && el.innerText.trim()) {
           const text = el.innerText.trim();
-          if (text.length > 0 && text.length < 50) return text;
+          if (text.length > 0 && text.length < maxLen) return text;
         }
       } catch (e) {}
     }
     return '';
+  }
+
+  // Lấy tất cả variant groups (màu + size riêng biệt)
+  function extractVariants() {
+    const results = [];
+    for (const sel of selectors.variants) {
+      try {
+        const els = document.querySelectorAll(sel);
+        els.forEach(el => {
+          const text = el.innerText.trim();
+          // Lọc text có nghĩa, không quá dài, không trùng
+          if (text && text.length > 1 && text.length < 300 && !results.includes(text)) {
+            results.push(text);
+          }
+        });
+        if (results.length > 0) break; // Lấy được rồi thì dừng
+      } catch(e) {}
+    }
+    return results.join('\n---\n');
   }
 
   return {
@@ -117,6 +139,7 @@ function extractProductInfo() {
     price: trySelectors(selectors.price),
     rating: trySelectors(selectors.rating),
     sold: trySelectors(selectors.sold),
+    variants: extractVariants(), // màu sắc + kích cỡ
     capturedAt: new Date().toLocaleString('vi-VN')
   };
 }
@@ -125,18 +148,11 @@ function extractProductInfo() {
 async function captureFullPage() {
   isCapturing = true;
 
-  // Thông báo bắt đầu
   chrome.runtime.sendMessage({ action: 'capture_progress', progress: 5, status: 'Chuẩn bị chụp...' });
 
   const originalScrollY = window.scrollY;
-  const originalOverflow = document.body.style.overflow;
 
   try {
-    // Ẩn các popup/sticky header nếu có
-    const stickyEls = document.querySelectorAll('[class*="sticky"], [class*="fixed"], [class*="float"]');
-    const hiddenEls = [];
-
-    // Lấy toàn bộ chiều cao trang
     const totalHeight = Math.max(
       document.body.scrollHeight,
       document.documentElement.scrollHeight
@@ -144,16 +160,14 @@ async function captureFullPage() {
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
 
-    // Cuộn về đầu trang
     window.scrollTo(0, 0);
     await sleep(500);
 
     chrome.runtime.sendMessage({ action: 'capture_progress', progress: 10, status: 'Bắt đầu cuộn trang...' });
 
-    // Tính số đoạn cần chụp
     const segments = [];
     let scrollY = 0;
-    const overlap = 50; // pixel overlap để ghép mượt
+    const overlap = 50;
 
     // Cuộn qua toàn bộ trang để load lazy images
     while (scrollY < totalHeight) {
@@ -162,13 +176,11 @@ async function captureFullPage() {
       scrollY += viewportHeight - overlap;
     }
 
-    // Cuộn về đầu để bắt đầu chụp
     window.scrollTo(0, 0);
     await sleep(600);
 
     chrome.runtime.sendMessage({ action: 'capture_progress', progress: 20, status: 'Đang chụp màn hình...' });
 
-    // Chụp từng đoạn
     scrollY = 0;
     let segmentIndex = 0;
     const maxSegments = Math.min(Math.ceil(totalHeight / (viewportHeight - overlap)), 15);
@@ -177,18 +189,12 @@ async function captureFullPage() {
       window.scrollTo(0, scrollY);
       await sleep(400);
 
-      // Yêu cầu background chụp tab hiện tại
       const dataUrl = await new Promise(resolve => {
         chrome.runtime.sendMessage({ action: 'capture_tab' }, resolve);
       });
 
       if (dataUrl) {
-        segments.push({
-          dataUrl,
-          scrollY,
-          viewportHeight,
-          viewportWidth
-        });
+        segments.push({ dataUrl, scrollY, viewportHeight, viewportWidth });
       }
 
       const progress = 20 + Math.round((segmentIndex / maxSegments) * 60);
@@ -204,15 +210,12 @@ async function captureFullPage() {
 
     chrome.runtime.sendMessage({ action: 'capture_progress', progress: 85, status: 'Đang ghép ảnh...' });
 
-    // Ghép tất cả segments thành 1 ảnh
     const finalImage = await stitchImages(segments, totalHeight, viewportWidth, overlap);
 
-    // Khôi phục scroll position
     window.scrollTo(0, originalScrollY);
 
     chrome.runtime.sendMessage({ action: 'capture_progress', progress: 95, status: 'Trích xuất thông tin...' });
 
-    // Lấy thêm thông tin từ DOM
     const productInfo = extractProductInfo();
 
     chrome.runtime.sendMessage({ action: 'capture_progress', progress: 100, status: 'Hoàn thành!' });
@@ -255,13 +258,10 @@ async function stitchImages(segments, totalHeight, viewportWidth, overlap) {
         images[i] = img;
         loadedCount++;
         if (loadedCount === segments.length) {
-          // Vẽ từng đoạn
           let currentY = 0;
           images.forEach((im, idx) => {
             if (!im) return;
-            const drawHeight = idx === images.length - 1
-              ? im.height
-              : im.height - overlap;
+            const drawHeight = idx === images.length - 1 ? im.height : im.height - overlap;
             ctx.drawImage(im, 0, currentY);
             currentY += drawHeight;
           });

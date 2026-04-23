@@ -842,7 +842,7 @@
       const parts = [];
       let ctx = '=== THÔNG TIN SẢN PHẨM ===\n';
       slots.forEach((s, i) => {
-        ctx += `\nSP${i+1}: ${s.name}\nSàn: ${s.platform}\nGiá: ${s.price||'N/A'}\nĐánh giá: ${s.rating||'N/A'}\nURL: ${s.url}\n`;
+        ctx += `\nSP${i+1}: ${s.name}\nSàn: ${s.platform}\nGiá: ${s.price||'N/A'}\nĐánh giá: ${s.rating||'N/A'}\n${s.variants ? `Màu/Size: ${s.variants}\n` : ''}URL: ${s.url}\n`;
       });
       parts.push({ type: 'text', text: ctx });
 
