@@ -59,19 +59,20 @@ function setupEventListeners() {
     btn.addEventListener('click', () => {
       document.getElementById('chat-input').value = btn.dataset.q;
       sendMessage();
-      // Switch to chat tab if not there
       document.querySelectorAll('.tab')[1].click();
     });
   });
 
-  // Settings
+  // Settings - Clear all
   document.getElementById('btn-clear-all').addEventListener('click', clearAllSlots);
+
+  // Settings - Reload extension
   document.getElementById('btn-reload-ext').addEventListener('click', () => {
-    if (!confirm('Reload extension sẽ xóa toàn bộ sản phẩm và lịch sử chat. Tiếp tục?')) return;
-    chrome.storage.local.clear(() => {
-      chrome.runtime.reload();
-    });
+  if (!confirm('Reload extension? Toàn bộ nội dung sẽ được tải lại.')) return;
+  chrome.storage.local.remove(['shopbot_chat'], () => {
+    chrome.runtime.sendMessage({ action: 'reload_extension' });
   });
+});
 
   // Preview overlay
   document.getElementById('preview-close').addEventListener('click', () => {
@@ -116,7 +117,6 @@ async function updateCurrentPageInfo() {
       document.getElementById('btn-capture-text').textContent = 'Chụp trang này';
     }
 
-    // Store current tab info
     window._currentTab = { tab, platform, url, title };
   } catch (e) {
     console.error('updateCurrentPageInfo error:', e);
@@ -140,7 +140,6 @@ async function handleCapture() {
   const progressEl = document.getElementById('capture-progress');
   progressEl.style.display = 'block';
 
-  // Lắng nghe progress từ content script
   const progressListener = (msg) => {
     if (msg.action === 'capture_progress') {
       document.getElementById('progress-fill').style.width = msg.progress + '%';
@@ -152,7 +151,6 @@ async function handleCapture() {
   try {
     const tabId = window._currentTab.tab.id;
 
-    // Ping content script, inject nếu chưa có
     let pingOk = false;
     try {
       pingOk = await new Promise(resolve => {
@@ -163,7 +161,6 @@ async function handleCapture() {
     } catch (e) {}
 
     if (!pingOk) {
-      // Inject content script
       await chrome.scripting.executeScript({
         target: { tabId },
         files: ['content_script.js']
@@ -171,7 +168,6 @@ async function handleCapture() {
       await sleep(600);
     }
 
-    // Bắt đầu capture
     const result = await new Promise((resolve, reject) => {
       chrome.tabs.sendMessage(tabId, { action: 'capture_page' }, (res) => {
         if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
@@ -182,10 +178,8 @@ async function handleCapture() {
     if (result?.error) throw new Error(result.error);
     if (!result?.success) throw new Error('Capture thất bại');
 
-    // Tạo thumbnail từ ảnh đã chụp
     const thumbnail = await createThumbnail(result.imageData, 88, 88);
 
-    // Lưu vào slot
     const slot = {
       id: Date.now(),
       platform: result.productInfo.platform,
@@ -205,10 +199,8 @@ async function handleCapture() {
     renderSlots();
     updateSlotCount();
 
-    // Thông báo trong chat
     addBotMessage(`✅ Đã lưu <strong>${slot.name.slice(0, 40)}${slot.name.length > 40 ? '...' : ''}</strong> (${slot.platform}).<br>Còn ${MAX_SLOTS - slots.length} slot trống.`);
 
-    // Update nút
     document.getElementById('btn-capture-text').textContent = slots.length >= MAX_SLOTS ? 'Đã đủ 5 sản phẩm' : 'Chụp trang này';
     btn.disabled = slots.length >= MAX_SLOTS;
 
@@ -223,7 +215,6 @@ async function handleCapture() {
   }
 }
 
-// Tạo thumbnail nhỏ từ ảnh lớn
 async function createThumbnail(dataUrl, w, h) {
   return new Promise(resolve => {
     if (!dataUrl) { resolve(''); return; }
@@ -232,7 +223,6 @@ async function createThumbnail(dataUrl, w, h) {
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
-      // Crop center
       const aspect = img.width / img.height;
       let sx = 0, sy = 0, sw = img.width, sh = img.height;
       if (aspect > 1) { sw = img.height; sx = (img.width - sw) / 2; }
@@ -280,7 +270,6 @@ function renderSlots() {
     </div>
   `).join('');
 
-  // Preview buttons
   container.querySelectorAll('[data-preview]').forEach(el => {
     el.addEventListener('click', () => {
       const idx = parseInt(el.dataset.preview);
@@ -291,7 +280,6 @@ function renderSlots() {
     });
   });
 
-  // Delete buttons
   container.querySelectorAll('[data-delete]').forEach(el => {
     el.addEventListener('click', async () => {
       const idx = parseInt(el.dataset.delete);
@@ -333,7 +321,6 @@ async function sendMessage() {
   input.value = '';
   input.style.height = 'auto';
 
-  // Switch to chat tab
   document.querySelectorAll('.tab')[1].click();
 
   addUserMessage(text);
@@ -355,7 +342,7 @@ async function sendMessage() {
   try {
     const userContentParts = [];
 
-    // Luôn gửi kèm thông tin text sản phẩm ở mọi câu hỏi
+    // Luôn gửi text context ở mọi câu hỏi
     if (slots.length > 0) {
       let productContext = '=== THÔNG TIN SẢN PHẨM ĐÃ LƯU ===\n';
       for (let i = 0; i < slots.length; i++) {
@@ -426,14 +413,12 @@ QUAN TRỌNG:
 - Dựa vào thông tin THỰC TẾ từ ảnh, không bịa
 - Trả lời bằng tiếng Việt`;
 
-    // Gọi Claude API qua background
     const response = await new Promise((resolve, reject) => {
       chrome.runtime.sendMessage({
         action: 'call_claude',
         payload: {
           system: systemPrompt,
           messages: [
-            // Chỉ giữ 6 tin nhắn gần nhất để tránh ngốn token
             ...chatHistory.slice(0, -1).slice(-6).map(m => ({
               role: m.role,
               content: m.content
@@ -465,7 +450,6 @@ QUAN TRỌNG:
 }
 
 function formatBotResponse(text) {
-  // Convert markdown-like to HTML
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
@@ -539,7 +523,6 @@ async function clearAllSlots() {
   renderSlots();
   updateSlotCount();
   await updateCurrentPageInfo();
-  // Reset chat
   window._imagesSentToAPI = false;
   chatHistory = [];
   saveChatHistory();
@@ -552,7 +535,6 @@ async function clearAllSlots() {
 // CHAT HISTORY STORAGE
 // ========================
 function saveChatHistory() {
-  // Chỉ lưu text, không lưu ảnh để tránh vượt giới hạn storage
   const toSave = chatHistory.map(m => ({
     role: m.role,
     content: typeof m.content === 'string' ? m.content : '[ảnh sản phẩm]'
@@ -565,9 +547,7 @@ async function loadChatHistory() {
     chrome.storage.local.get(['shopbot_chat'], (result) => {
       if (result.shopbot_chat && result.shopbot_chat.length > 0) {
         chatHistory = result.shopbot_chat;
-        // Render lại các tin nhắn đã lưu
         const container = document.getElementById('chat-messages');
-        // Xóa tin nhắn chào mặc định
         container.innerHTML = '';
         chatHistory.forEach(m => {
           if (m.role === 'user') {

@@ -579,7 +579,12 @@
     if (isOpen) updatePageInfo();
   });
 
-  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.action === 'reset_widget') {
+      root.remove();
+      sendResponse({ ok: true });
+      return;
+    }
     if (msg.action === 'toggle_widget') {
       // Nếu root đang bị ẩn (do bấm X), hiện lại và mở panel luôn
       if (root.style.display === 'none') {
