@@ -62,13 +62,24 @@ function extractProductInfo() {
       '[class*="price"]:not([class*="original"]):not([class*="label"]):not([class*="tag"]):not([class*="slash"])'
     ],
     rating: [
+      // Shopee 2026 - số sao
+      '.F9RHbS.dQEiAI.jMXp4d',
+      '.F9RHbS.dQEiAI',
+      // Shopee cũ
       '[class*="rating-stars__stars"]', '[class*="shopee-rating-stars"]',
       '[class*="rating--number"]', '[class*="ratingCount"]',
+      // Lazada
       '.pdp-review-summary__overall-rating',
+      // Tiki
       '.review-rating__point',
+      // Amazon
       '.a-icon-alt', '[class*="a-star"]',
       '[class*="stars"]',
       '[class*="rating"]', '[class*="Rating"]', '[class*="star"]'
+    ],
+    reviewCount: [
+      // Shopee 2026 - số lượt đánh giá
+      '.F9RHbS:not(.dQEiAI)',
     ],
     sold: [
       '[class*="sold"]', '[class*="Sold"]',
@@ -76,25 +87,16 @@ function extractProductInfo() {
       '[class*="quantity_sold"]',
       '[class*="sales"]', '[class*="sold-count"]'
     ],
-    // Variants: màu sắc + kích cỡ
     variants: [
-      // Shopee
-      '[class*="product-variation"]',
-      '[class*="variation-group"]',
-      '[class*="section-variation"]',
-      '[class*="variationGroup"]',
-      '[class*="flex-no-overflow"]',
       // Lazada
-      '[class*="sku-prop"]',
-      '[class*="skuProp"]',
-      '[class*="product-sku"]',
+      '[class*="sku-prop"]', '[class*="skuProp"]', '[class*="product-sku"]',
       // Tiki
-      '[class*="option-selector"]',
-      '[class*="ConfigurationSection"]',
+      '[class*="option-selector"]', '[class*="ConfigurationSection"]',
       // Amazon
-      '[id*="variation_"]',
-      '[class*="swatches"]',
+      '[id*="variation_"]', '[class*="swatches"]',
       // Generic
+      '[class*="product-variation"]', '[class*="variation-group"]',
+      '[class*="section-variation"]', '[class*="variationGroup"]',
       '[class*="variant"]', '[class*="Variant"]',
       '[class*="attribute"]', '[class*="swatch"]'
     ]
@@ -113,24 +115,34 @@ function extractProductInfo() {
     return '';
   }
 
-  // Lấy tất cả variant groups (màu + size riêng biệt)
   function extractVariants() {
+    // Shopee 2026 - lấy TẤT CẢ màu + size bằng class ZivAAW
+    const shopeeVariants = document.querySelectorAll('.ZivAAW');
+    if (shopeeVariants.length > 0) {
+      const values = [...shopeeVariants]
+        .map(el => el.innerText.trim())
+        .filter(Boolean);
+      if (values.length > 0) return 'Màu/Size: ' + values.join(' | ');
+    }
+
+    // Fallback các sàn khác
     const results = [];
     for (const sel of selectors.variants) {
       try {
         const els = document.querySelectorAll(sel);
         els.forEach(el => {
           const text = el.innerText.trim();
-          // Lọc text có nghĩa, không quá dài, không trùng
           if (text && text.length > 1 && text.length < 300 && !results.includes(text)) {
             results.push(text);
           }
         });
-        if (results.length > 0) break; // Lấy được rồi thì dừng
+        if (results.length > 0) break;
       } catch(e) {}
     }
     return results.join('\n---\n');
   }
+
+  const reviewCount = trySelectors(selectors.reviewCount, 30);
 
   return {
     platform,
@@ -138,8 +150,9 @@ function extractProductInfo() {
     title: title.replace(/\s*[-|]\s*(Shopee|Lazada|Tiki).*/i, '').trim(),
     price: trySelectors(selectors.price),
     rating: trySelectors(selectors.rating),
+    reviewCount,
     sold: trySelectors(selectors.sold),
-    variants: extractVariants(), // màu sắc + kích cỡ
+    variants: extractVariants(),
     capturedAt: new Date().toLocaleString('vi-VN')
   };
 }
