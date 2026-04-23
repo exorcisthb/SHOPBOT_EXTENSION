@@ -522,7 +522,7 @@
           </div>
           <div class="sb-settings-section">
             <div class="sb-settings-label">Developer</div>
-            <button class="sb-btn-dev" id="sb-btn-reload">🔄 Reload Extension</button>
+           <button class="sb-btn-danger" id="sb-btn-reload">🔄 Reset toàn bộ</button>
           </div>
           <div class="sb-settings-section">
             <div class="sb-settings-label">Tương thích</div>
@@ -929,8 +929,9 @@
     document.getElementById('sb-messages').innerHTML = '';
     addBotMsg('🗑️ Đã xóa tất cả. Bạn có thể thêm sản phẩm mới!');
   });
-  document.getElementById('sb-btn-reload').addEventListener('click', () => {
-    chrome.storage.local.remove(['shopbot_chat'], () => {
+ document.getElementById('sb-btn-reload').addEventListener('click', () => {
+    if (!confirm('Reset toàn bộ? Tất cả sản phẩm và lịch sử chat sẽ bị xóa.')) return;
+    chrome.storage.local.clear(() => {
       chrome.runtime.sendMessage({ action: 'reload_extension' });
     });
   });
