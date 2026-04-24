@@ -23,6 +23,23 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
+// Danh sách từ màu sắc tiếng Việt + tiếng Anh phổ biến
+const COLOR_KEYWORDS = [
+  'trắng','đen','đỏ','xanh','vàng','cam','tím','hồng','nâu','xám','bạc','kem',
+  'be','bò','rêu','olive','navy','nude','gold','silver','beige','ivory','coral',
+  'mint','lilac','camel','khaki','indigo','turquoise','maroon','burgundy',
+  'white','black','red','blue','green','yellow','orange','purple','pink','brown','gray','grey',
+  'trắng sữa','xanh lá','xanh dương','xanh navy','xanh rêu','xanh ngọc',
+  'đỏ đô','đỏ tươi','vàng chanh','vàng gold','nâu đất','nâu camel',
+  'xám tro','hồng pastel','tím than','đen tuyền','trắng ngà',
+  'caro','kẻ sọc','hoa','chấm bi'
+];
+
+function containsColor(text) {
+  const lower = text.toLowerCase();
+  return COLOR_KEYWORDS.some(kw => lower.includes(kw));
+}
+
 // Trích xuất thông tin sản phẩm từ DOM
 function extractProductInfo() {
   const url = window.location.href;
@@ -62,23 +79,17 @@ function extractProductInfo() {
       '[class*="price"]:not([class*="original"]):not([class*="label"]):not([class*="tag"]):not([class*="slash"])'
     ],
     rating: [
-      // Shopee 2026 - số sao
       '.F9RHbS.dQEiAI.jMXp4d',
       '.F9RHbS.dQEiAI',
-      // Shopee cũ
       '[class*="rating-stars__stars"]', '[class*="shopee-rating-stars"]',
       '[class*="rating--number"]', '[class*="ratingCount"]',
-      // Lazada
       '.pdp-review-summary__overall-rating',
-      // Tiki
       '.review-rating__point',
-      // Amazon
       '.a-icon-alt', '[class*="a-star"]',
       '[class*="stars"]',
       '[class*="rating"]', '[class*="Rating"]', '[class*="star"]'
     ],
     reviewCount: [
-      // Shopee 2026 - số lượt đánh giá
       '.F9RHbS:not(.dQEiAI)',
     ],
     sold: [
@@ -88,13 +99,9 @@ function extractProductInfo() {
       '[class*="sales"]', '[class*="sold-count"]'
     ],
     variants: [
-      // Lazada
       '[class*="sku-prop"]', '[class*="skuProp"]', '[class*="product-sku"]',
-      // Tiki
       '[class*="option-selector"]', '[class*="ConfigurationSection"]',
-      // Amazon
       '[id*="variation_"]', '[class*="swatches"]',
-      // Generic
       '[class*="product-variation"]', '[class*="variation-group"]',
       '[class*="section-variation"]', '[class*="variationGroup"]',
       '[class*="variant"]', '[class*="Variant"]',
@@ -116,13 +123,25 @@ function extractProductInfo() {
   }
 
   function extractVariants() {
-    // Shopee 2026 - lấy TẤT CẢ màu + size bằng class ZivAAW
+    // Shopee 2026 - lấy TẤT CẢ variants bằng class ZivAAW
     const shopeeVariants = document.querySelectorAll('.ZivAAW');
     if (shopeeVariants.length > 0) {
-      const values = [...shopeeVariants]
+      const allValues = [...shopeeVariants]
         .map(el => el.innerText.trim())
         .filter(Boolean);
-      if (values.length > 0) return 'Màu/Size: ' + values.join(' | ');
+
+      // Tách riêng: có màu vs không có màu
+      const colorValues = allValues.filter(v => containsColor(v));
+      const otherValues = allValues.filter(v => !containsColor(v));
+
+      let result = '';
+      if (colorValues.length > 0) {
+        result += 'Màu sắc có sẵn: ' + colorValues.join(' | ');
+      }
+      if (otherValues.length > 0) {
+        result += (result ? '\n' : '') + 'Phân loại khác (size/loại): ' + otherValues.join(' | ');
+      }
+      if (result) return result;
     }
 
     // Fallback các sàn khác
@@ -139,7 +158,18 @@ function extractProductInfo() {
         if (results.length > 0) break;
       } catch(e) {}
     }
-    return results.join('\n---\n');
+
+    if (results.length > 0) {
+      // Với sàn khác cũng tách màu vs khác
+      const colorItems = results.filter(v => containsColor(v));
+      const otherItems = results.filter(v => !containsColor(v));
+      let out = '';
+      if (colorItems.length > 0) out += 'Màu sắc có sẵn: ' + colorItems.join(' | ');
+      if (otherItems.length > 0) out += (out ? '\n' : '') + 'Phân loại khác: ' + otherItems.join('\n---\n');
+      return out || results.join('\n---\n');
+    }
+
+    return '';
   }
 
   const reviewCount = trySelectors(selectors.reviewCount, 30);
@@ -182,7 +212,6 @@ async function captureFullPage() {
     let scrollY = 0;
     const overlap = 50;
 
-    // Cuộn qua toàn bộ trang để load lazy images
     while (scrollY < totalHeight) {
       window.scrollTo(0, scrollY);
       await sleep(300);
@@ -249,7 +278,6 @@ async function captureFullPage() {
   }
 }
 
-// Ghép các ảnh chụp thành 1 ảnh dài
 async function stitchImages(segments, totalHeight, viewportWidth, overlap) {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
