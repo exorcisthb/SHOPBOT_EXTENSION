@@ -103,7 +103,7 @@
     .sb-theme-card[data-t="midnight"] .sb-theme-preview { background: linear-gradient(135deg,#16163a 50%,#a78bfa 100%); }
     .sb-theme-info { flex: 1; min-width: 0; }
     .sb-theme-name { font-size: 11px; font-weight: 600; color: var(--text); }
-    .sb-theme-desc { font-size: 10px; color: var(--text2); line-height: 1.3; }
+    .sb-theme-desc { display: none; }
     .sb-theme-check { font-size: 11px; color: var(--accent); opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
     /* 2-col danger buttons */
     .sb-btn-row {
