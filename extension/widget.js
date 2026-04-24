@@ -83,28 +83,32 @@
     /* Theme cards in settings */
     .sb-theme-grid {
       display: grid; grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      gap: 6px;
     }
     .sb-theme-card {
       background: var(--bg3); border: 2px solid var(--border);
-      border-radius: 10px; padding: 10px 11px;
+      border-radius: 8px; padding: 7px 8px;
       cursor: pointer; transition: all 0.18s;
-      display: flex; align-items: center; gap: 9px;
+      display: flex; align-items: center; gap: 7px;
     }
     .sb-theme-card:hover { border-color: var(--border2); background: var(--bg2); }
     .sb-theme-card.active { border-color: var(--accent); background: var(--bg2); }
     .sb-theme-card.active .sb-theme-check { opacity: 1; }
     .sb-theme-preview {
-      width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+      width: 22px; height: 22px; border-radius: 5px; flex-shrink: 0;
     }
     .sb-theme-card[data-t="bright"]   .sb-theme-preview { background: linear-gradient(135deg,#f0f0fa 50%,#ddd8ff 100%); border: 1px solid rgba(0,0,0,0.1); }
     .sb-theme-card[data-t="dark"]     .sb-theme-preview { background: linear-gradient(135deg,#1c1c22 50%,#0c0c10 100%); }
     .sb-theme-card[data-t="rose"]     .sb-theme-preview { background: linear-gradient(135deg,#ffe4ea 50%,#e0407a 100%); border: 1px solid rgba(220,80,120,0.15); }
     .sb-theme-card[data-t="midnight"] .sb-theme-preview { background: linear-gradient(135deg,#16163a 50%,#a78bfa 100%); }
     .sb-theme-info { flex: 1; min-width: 0; }
-    .sb-theme-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 1px; }
-    .sb-theme-desc { font-size: 10.5px; color: var(--text2); line-height: 1.4; }
-    .sb-theme-check { font-size: 13px; color: var(--accent); opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
+    .sb-theme-name { font-size: 11px; font-weight: 600; color: var(--text); }
+    .sb-theme-desc { font-size: 10px; color: var(--text2); line-height: 1.3; }
+    .sb-theme-check { font-size: 11px; color: var(--accent); opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
+    /* 2-col danger buttons */
+    .sb-btn-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
+    }
 
     /* ── FAB ── */
     #sb-fab {
@@ -631,11 +635,10 @@
           </div>
           <div class="sb-settings-section">
             <div class="sb-settings-label">Dữ liệu</div>
-            <button class="sb-btn-danger" id="sb-btn-clear">🗑️ Xóa tất cả sản phẩm đã lưu</button>
-          </div>
-          <div class="sb-settings-section">
-            <div class="sb-settings-label">Developer</div>
-           <button class="sb-btn-danger" id="sb-btn-reload">🔄 Reset toàn bộ</button>
+            <div class="sb-btn-row">
+              <button class="sb-btn-danger" id="sb-btn-clear">🗑️ Xóa sản phẩm</button>
+              <button class="sb-btn-danger" id="sb-btn-reload">🔄 Reset toàn bộ</button>
+            </div>
           </div>
           <div class="sb-settings-section">
             <div class="sb-settings-label">Tương thích</div>
