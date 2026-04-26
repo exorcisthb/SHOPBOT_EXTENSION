@@ -889,3 +889,39 @@
   color: var(--red);
   background: rgba(248,113,113,0.08);
 }
+
+/* History info banner */
+.sb-history-info-banner {
+  background: rgba(124,106,247,0.08);
+  border: 1px solid rgba(124,106,247,0.2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--text2);
+  margin-bottom: 12px;
+}
+.sb-history-info-banner strong {
+  color: var(--text);
+}
+
+/* History card clickable */
+.sb-history-card[data-load] {
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.sb-history-card[data-load]:hover {
+  border-color: var(--accent);
+  background: rgba(124,106,247,0.04);
+}
+
+/* History card preview */
+.sb-history-card-preview {
+  font-size: 11px;
+  color: var(--text3);
+  font-style: italic;
+  margin: 3px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
