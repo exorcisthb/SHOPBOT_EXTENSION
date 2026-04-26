@@ -73,7 +73,6 @@
   <button class="sb-quick-btn" data-q="Sản phẩm nào phù hợp mua làm quà tặng hơn? Giải thích lý do">🎁 Mua làm quà</button>
   <button class="sb-quick-btn" data-q="Nếu dùng hàng ngày thì nên chọn cái nào? Tại sao?">💪 Dùng hàng ngày</button>
   <button class="sb-quick-btn" data-q="Sản phẩm nào có rủi ro khi mua thấp hơn? Phân tích">⚠️ Rủi ro mua hàng</button>
-  <button class="sb-quick-btn" data-q="Tôi là người mới mua lần đầu, nên chọn cái nào và tại sao?">🔰 Người mới mua</button>
   <button class="sb-quick-btn" data-q="Phân tích chi tiết lượt đánh giá và số sao của từng sản phẩm">📊 Phân tích review</button>
 </div>
         <div class="sb-input-area">
