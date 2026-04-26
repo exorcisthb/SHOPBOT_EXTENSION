@@ -825,6 +825,7 @@
         name: captureResult.productInfo?.title || document.title,
         price: captureResult.productInfo?.price || '',
         rating: captureResult.productInfo?.rating || '',
+        reviewCount: captureResult.productInfo?.reviewCount || '',
         sold: captureResult.productInfo?.sold || '',
         url: window.location.href,
         capturedAt: new Date().toLocaleString('vi-VN'),
