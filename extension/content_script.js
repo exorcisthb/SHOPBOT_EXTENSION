@@ -171,26 +171,31 @@ function extractProductInfo() {
   }
 
   function extractReviewCount() {
-    // ── CHIẾN LƯỢC 1 (Shopee): tìm button có child chứa "đánh giá" / "x1i_He" ──
-    // Cấu trúc Shopee: <button><div class="F9RHbS">318</div><div class="x1i_He">đánh giá</div></button>
+    // Cấu trúc Shopee đã xác nhận từ DevTools:
+    // <button><div class="F9RHbS">318</div><div class="x1i_He">đánh giá</div></button>
+    // Logic: tìm button có đúng 2 child — 1 child là số thuần, 1 child là "đánh giá"
     const buttons = document.querySelectorAll('button');
     for (const btn of buttons) {
       const children = Array.from(btn.children);
-      // Tìm child nào chứa text "đánh giá" (không phân biệt hoa thường)
-      const labelEl = children.find(c => /đánh\s*giá/i.test(c.innerText?.trim()));
+      // Tìm child nào có text chính xác là "đánh giá" (trim, không lấy button to hơn)
+      const labelEl = children.find(c =>
+        /^đánh\s*giá$/i.test(c.innerText?.trim())
+      );
       if (!labelEl) continue;
-      // Lấy sibling còn lại — phải là số
-      const numEl = children.find(c => c !== labelEl && /^[\d.,]+k?$/i.test(c.innerText?.trim()));
+      // Sibling còn lại phải là số nguyên dương (có thể có dấu . phân cách nghìn)
+      const numEl = children.find(c =>
+        c !== labelEl && /^[\d.]+$/.test(c.innerText?.trim())
+      );
       if (numEl) return numEl.innerText.trim();
     }
 
-    // ── CHIẾN LƯỢC 2: quét mọi element có ít con, text khớp "318 Đánh Giá" ──
-    const reviewPattern = /^([\d.,k]+)\s*(đánh\s*giá|ratings?|reviews?|nhận\s*xét)/i;
-    const allEls = document.querySelectorAll('a, span, div, p, button, li');
-    for (const el of allEls) {
-      if (el.children.length > 4) continue;
+    // Fallback cho các sàn khác (Amazon, Lazada...): tìm text "X ratings/reviews"
+    const reviewPattern = /^([\d,]+)\s*(ratings?|reviews?)/i;
+    const candidates = document.querySelectorAll('a, span');
+    for (const el of candidates) {
+      if (el.children.length > 1) continue;
       const raw = el.innerText?.trim();
-      if (!raw || raw.length > 60) continue;
+      if (!raw || raw.length > 40) continue;
       const m = raw.match(reviewPattern);
       if (m) return m[1];
     }
