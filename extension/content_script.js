@@ -89,7 +89,7 @@ function extractProductInfo() {
       '[class*="stars"]',
       '[class*="rating"]', '[class*="Rating"]', '[class*="star"]'
     ],
-   reviewCount: [],
+    reviewCount: [],
     sold: [
       '[class*="sold"]', '[class*="Sold"]',
       '[class*="historical_sold"]',
@@ -171,6 +171,40 @@ function extractProductInfo() {
   }
 
   function extractReviewCount() {
+    // ── CHIẾN LƯỢC 1: Quét toàn bộ DOM tìm pattern "số + Đánh Giá/đánh giá/Ratings/reviews" ──
+    // Ví dụ: "318 Đánh Giá", "1.2k Đánh Giá", "4,500 ratings"
+    const reviewPattern = /^([\d.,k]+)\s*(đánh\s*giá|ratings?|reviews?|nhận\s*xét)/i;
+    const allEls = document.querySelectorAll('*');
+    for (const el of allEls) {
+      // Chỉ xét leaf node hoặc node có ít children để tránh lấy text tổng hợp
+      if (el.children.length > 3) continue;
+      const raw = el.innerText?.trim();
+      if (!raw || raw.length > 60) continue;
+      const m = raw.match(reviewPattern);
+      if (m) return m[1]; // trả về phần số, ví dụ "318"
+    }
+
+    // ── CHIẾN LƯỢC 2: Tìm element chứa chữ "Đánh Giá" rồi lấy số đứng trước/trong đó ──
+    // Xử lý trường hợp số và chữ nằm tách riêng 2 element con
+    const walkNodes = document.querySelectorAll(
+      'a, span, div, p, button'
+    );
+    for (const el of walkNodes) {
+      if (el.children.length > 5) continue;
+      const raw = el.innerText?.trim() || '';
+      if (!/đánh\s*giá/i.test(raw)) continue;
+
+      // Lấy tất cả text thuần trong element này, tách bằng whitespace
+      const parts = raw.split(/\s+/);
+      for (const part of parts) {
+        // Tìm phần tử là số thuần (có thể có dấu . hoặc ,)
+        if (/^[\d.,]+k?$/i.test(part) && parseInt(part.replace(/[.,]/g, '')) > 0) {
+          return part;
+        }
+      }
+    }
+
+    // ── CHIẾN LƯỢC 3 (fallback cũ - tìm trong button) ──
     const buttons = document.querySelectorAll('button');
     for (const btn of buttons) {
       if (btn.innerText.includes('đánh giá') || btn.innerText.includes('Đánh giá')) {
@@ -179,10 +213,15 @@ function extractProductInfo() {
           const text = numEl.innerText.trim();
           if (text && text.length < 20) return text;
         }
+        // Fallback: lấy số từ text của button
+        const m = btn.innerText.match(/([\d.,]+k?)\s*đánh\s*giá/i);
+        if (m) return m[1];
       }
     }
+
     return '';
   }
+
   const reviewCount = extractReviewCount();
 
   return {
