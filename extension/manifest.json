@@ -18,7 +18,14 @@
     {
       "matches": ["<all_urls>"],
       "js": ["content_script.js", "widget.js"],
+      "css": ["widget.css"],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["widget.css", "icons/*"],
+      "matches": ["<all_urls>"]
     }
   ],
   "icons": {

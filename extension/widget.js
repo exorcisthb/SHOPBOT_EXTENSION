@@ -3,17 +3,6 @@
 (function () {
   if (document.getElementById('shopbot-root')) return;
 
-  // ============================================================
-  // INJECT CSS
-  // ============================================================
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = chrome.runtime.getURL('widget.css');
-  document.head.appendChild(link);
-
-  // ============================================================
-  // HTML
-  // ============================================================
   const root = document.createElement('div');
   root.id = 'shopbot-root';
   root.setAttribute('data-theme', 'bright');
