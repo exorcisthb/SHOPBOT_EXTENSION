@@ -944,7 +944,6 @@ QUAN TRỌNG: KHÔNG dùng markdown. Trả lời bằng tiếng Việt.`,
       }, 350);
     });
 
-    // Click v\u00e0o card \u0111\u1ec3 xem l\u1ea1i \u0111o\u1ea1n chat
     hp.querySelectorAll("[data-load]").forEach((card) => {
       card.addEventListener("click", async () => {
         const id = parseInt(card.dataset.load);
@@ -952,20 +951,49 @@ QUAN TRỌNG: KHÔNG dùng markdown. Trả lời bằng tiếng Việt.`,
         const session = h.find((x) => x.id === id);
         if (!session || !session.messages) return;
 
-        chatHistory = [...session.messages];
-        saveChatHistory();
-        window._sbImgSent = false;
-        const c = document.getElementById("sb-messages");
-        c.innerHTML = "";
-        chatHistory.forEach((m) =>
-          m.role === "user" ? addUserMsg(m.content) : addBotMsg(fmt(m.content)),
-        );
+        // Xây dựng popup chi tiết lịch sử (Read-only)
+        const detail = document.createElement("div");
+        detail.className = "sb-history-detail";
 
-        hp.classList.remove("sb-panel-open");
-        setTimeout(() => {
-          hp.remove();
-        }, 350);
-        document.querySelectorAll(".sb-tab")[1].click();
+        const header = document.createElement("div");
+        header.className = "sb-history-detail-header";
+        header.innerHTML = `
+          <button class="sb-history-detail-back" id="sb-detail-back">←</button>
+          <div class="sb-history-detail-title">${session.name}</div>
+        `;
+
+        const body = document.createElement("div");
+        body.className = "sb-history-detail-body sb-messages"; // Re-use .sb-messages padding style if needed
+
+        session.messages.forEach((m) => {
+          const d = document.createElement("div");
+          if (m.role === "user") {
+            d.className = "sb-msg user";
+            d.innerHTML = `<div class="sb-avatar usr">U</div><div class="sb-bubble">${esc(m.content)}</div>`;
+          } else {
+            d.className = "sb-msg bot";
+            d.innerHTML = `<div class="sb-avatar bot">S</div><div class="sb-bubble">${fmt(m.content)}</div>`;
+          }
+          body.appendChild(d);
+        });
+
+        detail.appendChild(header);
+        detail.appendChild(body);
+        hp.appendChild(detail);
+
+        // Trigger animation
+        detail.offsetHeight;
+        requestAnimationFrame(() => detail.classList.add("open"));
+
+        // Xử lý nút Back của chi tiết lịch sử
+        header
+          .querySelector("#sb-detail-back")
+          .addEventListener("click", () => {
+            detail.classList.remove("open");
+            setTimeout(() => {
+              detail.remove();
+            }, 300);
+          });
       });
     });
 

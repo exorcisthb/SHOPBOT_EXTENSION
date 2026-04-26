@@ -272,7 +272,7 @@ function extractProductInfo() {
       const numEl =
         labelEl.previousElementSibling ||
         labelEl.parentElement?.querySelector(".F9RHbS");
-      if (numEl && /^[\d.]+$/.test(numEl.innerText?.trim())) {
+      if (numEl && /^[\d.,kKmM]+$/.test(numEl.innerText?.trim())) {
         return numEl.innerText.trim();
       }
     }
@@ -284,7 +284,7 @@ function extractProductInfo() {
       if (!labelChild) continue;
       if (!/^đánh\s*giá$/i.test(labelChild.innerText?.trim())) continue;
       const numChild = btn.querySelector(".F9RHbS");
-      if (numChild && /^[\d.]+$/.test(numChild.innerText?.trim())) {
+      if (numChild && /^[\d.,kKmM]+$/.test(numChild.innerText?.trim())) {
         return numChild.innerText.trim();
       }
     }
