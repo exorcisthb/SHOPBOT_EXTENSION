@@ -266,9 +266,15 @@ async function captureFullPage() {
       window.scrollTo(0, scrollY);
       await sleep(400);
 
+      const widget = document.getElementById('shopbot-root');
+      if (widget) widget.style.opacity = '0';
+      await sleep(50); // Ensure the browser has painted the hidden state
+
       const dataUrl = await new Promise(resolve => {
         chrome.runtime.sendMessage({ action: 'capture_tab' }, resolve);
       });
+
+      if (widget) widget.style.opacity = '1';
 
       if (dataUrl) {
         segments.push({ dataUrl, scrollY, viewportHeight, viewportWidth });
