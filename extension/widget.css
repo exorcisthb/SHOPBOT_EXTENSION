@@ -696,3 +696,177 @@
 #shopbot-root ::-webkit-scrollbar { width: 3px; }
 #shopbot-root ::-webkit-scrollbar-track { background: transparent; }
 #shopbot-root ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
+
+/* ── History Panel ── */
+#sb-history-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+  border-radius: 18px;
+  overflow: hidden;
+}
+#sb-history-panel.sb-panel-open {
+  transform: translateX(0);
+}
+
+.sb-history-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+.sb-history-back {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+}
+.sb-history-back:hover {
+  background: var(--bg3);
+  color: var(--text);
+  border-color: var(--border2);
+}
+.sb-history-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.sb-history-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px;
+}
+
+.sb-history-empty {
+  text-align: center;
+  padding: 28px 0;
+  color: var(--text3);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.sb-history-empty-icon {
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.sb-history-section-label {
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 10px 0 6px;
+}
+
+.sb-history-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  transition: border-color 0.15s;
+}
+.sb-history-card:hover {
+  border-color: var(--border2);
+}
+.sb-history-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  gap: 6px;
+}
+.sb-history-card-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-history-card-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.sb-history-card-meta {
+  font-size: 10px;
+  color: var(--text3);
+}
+
+.sb-history-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  color: var(--text2);
+  font-family: 'Inter', sans-serif;
+}
+.sb-history-btn:hover {
+  background: var(--bg3);
+  color: var(--text);
+  border-color: var(--border2);
+}
+.sb-history-btn.star.active {
+  border-color: rgba(251,191,36,0.4);
+  color: var(--yellow);
+}
+.sb-history-btn.star.active:hover {
+  background: rgba(251,191,36,0.1);
+}
+.sb-history-btn.del:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(248,113,113,0.08);
+}
+
+/* ── "Chat mới" button accent override ── */
+#sb-btn-new-chat {
+  border-color: rgba(124,106,247,0.28);
+  color: var(--accent);
+  margin-top: 7px;
+}
+#sb-btn-new-chat:hover {
+  background: rgba(124,106,247,0.08);
+}
+#sb-btn-history {
+  border-color: rgba(167,139,250,0.28);
+  color: #a78bfa;
+  margin-top: 7px;
+}
+#sb-btn-history:hover {
+  background: rgba(167,139,250,0.08);
+}
+#sb-btn-new-chat, #sb-btn-history {
+  width: 100%;
+}
