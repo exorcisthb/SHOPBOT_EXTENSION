@@ -1078,7 +1078,7 @@ QUAN TRỌNG: KHÔNG dùng markdown. Trả lời bằng tiếng Việt.`,
       };
       img.src = dataUrl;
     });
-  } F
+  } 
   function fmt(t) {
     return t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
   }
