@@ -171,22 +171,26 @@ function extractProductInfo() {
   }
 
   function extractReviewCount() {
-    // Cấu trúc Shopee đã xác nhận từ DevTools:
-    // <button><div class="F9RHbS">318</div><div class="x1i_He">đánh giá</div></button>
-    // Logic: tìm button có đúng 2 child — 1 child là số thuần, 1 child là "đánh giá"
-    const buttons = document.querySelectorAll('button');
-    for (const btn of buttons) {
-      const children = Array.from(btn.children);
-      // Tìm child nào có text chính xác là "đánh giá" (trim, không lấy button to hơn)
-      const labelEl = children.find(c =>
-        /^đánh\s*giá$/i.test(c.innerText?.trim())
-      );
-      if (!labelEl) continue;
-      // Sibling còn lại phải là số nguyên dương (có thể có dấu . phân cách nghìn)
-      const numEl = children.find(c =>
-        c !== labelEl && /^[\d.]+$/.test(c.innerText?.trim())
-      );
-      if (numEl) return numEl.innerText.trim();
+    // Cấu trúc Shopee đã xác nhận: <button class="...e2p50f"><div class="F9RHbS">25</div><div class="x1i_He">đánh giá</div></button>
+    // Dùng class x1i_He làm anchor — đây là class chứa chữ "đánh giá" trên Shopee
+    const labelEl = document.querySelector('.x1i_He');
+    if (labelEl && /^đánh\s*giá$/i.test(labelEl.innerText?.trim())) {
+      const numEl = labelEl.previousElementSibling || labelEl.parentElement?.querySelector('.F9RHbS');
+      if (numEl && /^[\d.]+$/.test(numEl.innerText?.trim())) {
+        return numEl.innerText.trim();
+      }
+    }
+
+    // Fallback: duyệt tất cả button, ưu tiên button đầu tiên có child class x1i_He
+    const reviewBtns = document.querySelectorAll('button');
+    for (const btn of reviewBtns) {
+      const labelChild = btn.querySelector('.x1i_He');
+      if (!labelChild) continue;
+      if (!/^đánh\s*giá$/i.test(labelChild.innerText?.trim())) continue;
+      const numChild = btn.querySelector('.F9RHbS');
+      if (numChild && /^[\d.]+$/.test(numChild.innerText?.trim())) {
+        return numChild.innerText.trim();
+      }
     }
 
     // Fallback cho các sàn khác (Amazon, Lazada...): tìm text "X ratings/reviews"
