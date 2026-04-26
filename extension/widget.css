@@ -870,9 +870,6 @@
 
 /* ── Settings: Dữ liệu buttons ── */
 /* sb-btn-new-chat is now in chat topbar, not settings */
-#sb-btn-new-chat {
-  /* This id is now used for the inline chat topbar button */
-}
 
 /* ── Preview overlay ── */
 #sb-preview {
