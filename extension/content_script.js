@@ -90,8 +90,8 @@ function extractProductInfo() {
       '[class*="rating"]', '[class*="Rating"]', '[class*="star"]'
     ],
    reviewCount: [
-  'button.e2p50f .F9RHbS',
-  'button[class*="e2p50f"] .F9RHbS',
+  'button.e2p50f:has(.x1i_He) .F9RHbS',
+  'button[class*="e2p50f"]:has([class*="x1i_He"]) .F9RHbS',
 ],
     sold: [
       '[class*="sold"]', '[class*="Sold"]',
