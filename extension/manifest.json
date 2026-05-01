@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ShopBot AI - So Sánh Sản Phẩm",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "AI hỗ trợ so sánh & tư vấn mua sắm thông minh trên Shopee, Lazada, Tiki",
   "permissions": ["activeTab", "scripting", "storage", "tabs"],
   "host_permissions": ["<all_urls>"],

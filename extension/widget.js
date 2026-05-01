@@ -336,19 +336,21 @@
 
         const thumbnail = await createThumb(captureResult.imageData, 88, 88);
         const slot = {
-          id: Date.now(),
-          platform: captureResult.productInfo?.platform || "Web",
-          name: captureResult.productInfo?.title || document.title,
-          price: captureResult.productInfo?.price || "",
-          rating: captureResult.productInfo?.rating || "",
-          reviewCount: captureResult.productInfo?.reviewCount || "",
-          sold: captureResult.productInfo?.sold || "",
-          url: window.location.href,
-          capturedAt: new Date().toLocaleString("vi-VN"),
-          imageData: captureResult.imageData,
-          thumbnail,
-          segments: captureResult.segments,
-        };
+  id: Date.now(),
+  platform: captureResult.productInfo?.platform || "Web",
+  name: captureResult.productInfo?.title || document.title,
+  price: captureResult.productInfo?.price || "",
+  rating: captureResult.productInfo?.rating || "",
+  reviewCount: captureResult.productInfo?.reviewCount || "",
+  sold: captureResult.productInfo?.sold || "",
+  shopName: captureResult.productInfo?.shopName || "", 
+  variants: captureResult.productInfo?.variants || "",  
+  url: window.location.href,
+  capturedAt: new Date().toLocaleString("vi-VN"),
+  imageData: captureResult.imageData,
+  thumbnail,
+  segments: captureResult.segments,
+};
         slots.push(slot);
         await saveSlots();
         renderSlots();
@@ -587,38 +589,72 @@
               model,
               system: `Bạn là ShopBot - trợ lý so sánh sản phẩm chuyên nghiệp trên Shopee, Lazada, Tiki...
 
-BƯỚC 1 - Phân tích TỪNG sản phẩm:
-━━━ SẢN PHẨM [số]: [Tên] ━━━
-💰 Giá: [giá]
-⭐ Đánh giá: [sao] ([lượt])
-📦 Đã bán: [số lượng]
-🏪 Shop: [tên shop lấy từ ảnh (TUYỆT ĐỐI KHÔNG LẤY SỐ ID TỪ URL) + Mall/thường]
-✅ Ưu điểm: [ít nhất 3 điểm]
-❌ Nhược điểm: [ít nhất 2 điểm]
+BƯỚC 1 - Phân tích TỪNG sản phẩm theo cấu trúc:
 
-Chấm điểm CỐ ĐỊNH:
-💰 Giá cả: [X/2]
-⭐ Đánh giá người mua: [X/2]
-📦 Độ tin cậy: [X/2]
+━━━ SẢN PHẨM [số]: [Tên sản phẩm] ━━━
+💰 Giá: [giá thực tế từ ảnh]
+⭐ Đánh giá: [số sao] ([số lượt])
+📦 Đã bán: [số lượng nếu có]
+🏪 Shop: [tên shop + Mall/uy tín nếu có]
 
-Chấm điểm ĐỘNG (chỉ khi thấy trong ảnh):
-- Thấy chất liệu/vải → 🧵 Chất liệu: [X/1]
-- Thấy thông số kỹ thuật → ⚙️ Thông số: [X/2]
-- Thấy bảo hành → 🛡️ Bảo hành: [X/1]
-- Thấy size/kích thước rõ → 📐 Size: [X/1]
-- Thấy thành phần → 🧪 Thành phần: [X/1]
-- Thấy công suất/điện năng → ⚡ Công suất: [X/1]
-🎯 Tổng: [X/tổng thang]
+CHẤM ĐIỂM - Chỉ chấm 3 tiêu chí CƠ BẢN (luôn có):
+💰 Giá cả: [X/2] — dựa trên giá so với thị trường, có sale không
+⭐ Đánh giá người mua: [X/2] — dựa trên số sao + số lượt đánh giá
+📦 Độ tin cậy shop: [X/2] — dựa trên Mall/uy tín/thời gian hoạt động
+
+Sau đó XÁC ĐỊNH danh mục sản phẩm và chấm thêm tiêu chí CHUYÊN SÂU phù hợp:
+
+Nếu là THỜI TRANG / PHỤ KIỆN:
+👗 Mẫu mã & màu sắc: [X/2] — đa dạng lựa chọn, trend không
+📐 Size & fit: [X/1] — có đủ size, mô tả rõ không
+🧵 Chất liệu: [X/1] — có ghi rõ chất liệu không
+
+Nếu là CÔNG NGHỆ / ĐIỆN TỬ:
+⚙️ Thông số kỹ thuật: [X/2] — CPU/RAM/pin/màn hình...
+🔋 Hiệu năng/Pin: [X/1] — thông số pin, hiệu năng
+🛡️ Bảo hành: [X/1] — có bảo hành, thời gian bao lâu
+
+Nếu là MỸ PHẨM / LÀM ĐẸP:
+🧴 Thành phần: [X/2] — có ghi thành phần không, an toàn không
+✨ Công dụng: [X/1] — mô tả công dụng rõ không
+⏰ HSD & xuất xứ: [X/1] — có ghi hạn sử dụng, nguồn gốc không
+
+Nếu là ĐỒ GIA DỤNG / NỘI THẤT:
+📏 Kích thước & chất liệu: [X/2] — ghi rõ không
+🔧 Lắp đặt & sử dụng: [X/1] — dễ dùng không
+⚡ Công suất/Hiệu quả: [X/1] — nếu có thông số điện
+
+Nếu là THỰC PHẨM / ĐỒ ĂN:
+🥗 Thành phần & dinh dưỡng: [X/2]
+📅 HSD & bảo quản: [X/1]
+🏭 Xuất xứ & thương hiệu: [X/1]
+
+QUAN TRỌNG khi chấm điểm:
+- Nếu thông tin KHÔNG có trong ảnh → KHÔNG chấm tiêu chí đó, bỏ qua hoàn toàn
+- Chỉ chấm những gì THỰC SỰ thấy được từ ảnh
+- Không chấm 0 chỉ vì không thấy — hãy bỏ tiêu chí đó đi
+- Tổng điểm = tổng các tiêu chí thực sự chấm được
+
+✅ Ưu điểm: [ít nhất 3 điểm dựa trên thông tin thực từ ảnh]
+❌ Nhược điểm: [ít nhất 2 điểm thực tế]
+🎯 Tổng: [X/tổng điểm tối đa của các tiêu chí đã chấm]
 
 BƯỚC 2 - So sánh & Kết luận:
-━━━ KẾT LUẬN ━━━
-🏆 ShopBot gợi ý: [Tên sản phẩm]
-Lý do: [giải thích ngắn gọn]
+
+━━━ SO SÁNH NHANH ━━━
+[So sánh trực tiếp các tiêu chí chính giữa các sản phẩm]
+
+━━━ QUYẾT ĐỊNH ━━━
+🏆 Nên mua: [Tên sản phẩm cụ thể]
+Lý do: [Giải thích rõ tại sao]
 ⚠️ Lưu ý: [size, màu, liên hệ shop...]
 
-💬 Đây chỉ là gợi ý tham khảo dựa trên thông tin hiển thị — bạn mới là người hiểu rõ nhu cầu và đưa ra quyết định cuối cùng!
-
-QUAN TRỌNG: KHÔNG dùng markdown. Trả lời bằng tiếng Việt.`,
+QUAN TRỌNG:
+- KHÔNG dùng markdown (#, ##, **, ---)
+- Chỉ dùng text thuần + emoji + ━
+- Phân tích ĐẦY ĐỦ, KHÔNG cắt ngắn
+- Dựa vào thông tin THỰC TẾ từ ảnh
+- Trả lời bằng tiếng Việt`,
               messages: [
                 ...chatHistory
                   .slice(0, -1)
@@ -765,11 +801,12 @@ QUAN TRỌNG: KHÔNG dùng markdown. Trả lời bằng tiếng Việt.`,
       }),
     );
   }
-  async function saveSlots() {
-    return new Promise((r) =>
-      chrome.storage.local.set({ shopbot_slots: slots }, r),
-    );
-  }
+ async function saveSlots() {
+  const toSave = slots.map((s) => ({ ...s, imageData: "" })); // strip ảnh gốc, chỉ giữ thumbnail
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ shopbot_slots: toSave }, resolve);
+  });
+}
   function saveChatHistory() {
     chrome.storage.local.set({
       shopbot_chat: chatHistory.map((m) => ({

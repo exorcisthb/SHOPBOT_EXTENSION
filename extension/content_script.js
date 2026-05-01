@@ -16,8 +16,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.action === "extract_info") {
-    const info = extractProductInfo();
-    sendResponse(info);
+    // Dùng async để chờ shopName render xong
+    extractProductInfoAsync()
+      .then((info) => sendResponse(info))
+      .catch(() => sendResponse(extractProductInfo()));
+    return true; // async
   }
 
   if (msg.action === "ping") {
@@ -98,8 +101,37 @@ function containsColor(text) {
   return COLOR_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
-// Trích xuất thông tin sản phẩm từ DOM
-function extractProductInfo() {
+// Chờ shopName render xong với retry
+async function extractShopNameAsync(retries = 8, delay = 500) {
+  const shopSelectors = [
+    ".PYEGyz .fV3TIn",
+    ".fV3TIn",
+    ".VlDGOl",
+    '[class*="shop-name"]',
+    '[class*="shopName"]',
+    '[class*="seller-name"]',
+    '[class*="sellerName"]',
+    ".pdp-shop-name",
+  ];
+
+  for (let i = 0; i < retries; i++) {
+    for (const sel of shopSelectors) {
+      try {
+        const els = document.querySelectorAll(sel);
+        for (const el of els) {
+          const text = (el?.innerText || el?.textContent || "").trim();
+          if (text.length > 0 && text.length < 100) return text;
+        }
+      } catch (e) {}
+    }
+    // Chưa tìm thấy → chờ rồi thử lại
+    await new Promise((r) => setTimeout(r, delay));
+  }
+  return "";
+}
+
+// Trích xuất thông tin sản phẩm từ DOM (sync - dùng khi đã có shopName)
+function extractProductInfo(shopNameOverride = null) {
   const url = window.location.href;
   let platform = "unknown";
   if (url.includes("shopee.vn")) platform = "Shopee";
@@ -188,23 +220,14 @@ function extractProductInfo() {
       '[class*="attribute"]',
       '[class*="swatch"]',
     ],
-    shopName: [
-      ".fV3TIn",
-      ".VlDGOl",
-      '[class*="shop-name"]',
-      '[class*="shopName"]',
-      '[class*="seller-name"]',
-      '[class*="sellerName"]',
-      ".pdp-shop-name",
-    ],
   };
 
   function trySelectors(list, maxLen = 50) {
     for (const sel of list) {
       try {
-        const el = document.querySelector(sel);
-        if (el && el.innerText.trim()) {
-          const text = el.innerText.trim();
+        const els = document.querySelectorAll(sel);
+        for (const el of els) {
+          const text = (el.innerText || el.textContent || "").trim();
           if (text.length > 0 && text.length < maxLen) return text;
         }
       } catch (e) {}
@@ -220,7 +243,6 @@ function extractProductInfo() {
         .map((el) => el.innerText.trim())
         .filter(Boolean);
 
-      // Tách riêng: có màu vs không có màu
       const colorValues = allValues.filter((v) => containsColor(v));
       const otherValues = allValues.filter((v) => !containsColor(v));
 
@@ -258,7 +280,6 @@ function extractProductInfo() {
     }
 
     if (results.length > 0) {
-      // Với sàn khác cũng tách màu vs khác
       const colorItems = results.filter((v) => containsColor(v));
       const otherItems = results.filter((v) => !containsColor(v));
       let out = "";
@@ -274,8 +295,6 @@ function extractProductInfo() {
   }
 
   function extractReviewCount() {
-    // Cấu trúc Shopee đã xác nhận: <button class="...e2p50f"><div class="F9RHbS">25</div><div class="x1i_He">đánh giá</div></button>
-    // Dùng class x1i_He làm anchor — đây là class chứa chữ "đánh giá" trên Shopee
     const labelEl = document.querySelector(".x1i_He");
     if (labelEl && /^đánh\s*giá$/i.test(labelEl.innerText?.trim())) {
       const numEl =
@@ -286,7 +305,6 @@ function extractProductInfo() {
       }
     }
 
-    // Fallback: duyệt tất cả button, ưu tiên button đầu tiên có child class x1i_He
     const reviewBtns = document.querySelectorAll("button");
     for (const btn of reviewBtns) {
       const labelChild = btn.querySelector(".x1i_He");
@@ -298,7 +316,7 @@ function extractProductInfo() {
       }
     }
 
-    // Fallback cho các sàn khác (Amazon, Lazada...): tìm text "X ratings/reviews"
+    // Fallback cho các sàn khác (Amazon, Lazada...)
     const reviewPattern = /^([\d,]+)\s*(ratings?|reviews?)/i;
     const candidates = document.querySelectorAll("a, span");
     for (const el of candidates) {
@@ -312,6 +330,30 @@ function extractProductInfo() {
     return "";
   }
 
+  // Sync fallback cho shopName (dùng khi không có override)
+  function extractShopNameSync() {
+    const shopSelectors = [
+      ".PYEGyz .fV3TIn",
+      ".fV3TIn",
+      ".VlDGOl",
+      '[class*="shop-name"]',
+      '[class*="shopName"]',
+      '[class*="seller-name"]',
+      '[class*="sellerName"]',
+      ".pdp-shop-name",
+    ];
+    for (const sel of shopSelectors) {
+      try {
+        const els = document.querySelectorAll(sel);
+        for (const el of els) {
+          const text = (el?.innerText || el?.textContent || "").trim();
+          if (text.length > 0 && text.length < 100) return text;
+        }
+      } catch (e) {}
+    }
+    return "";
+  }
+
   const reviewCount = extractReviewCount();
 
   return {
@@ -322,10 +364,16 @@ function extractProductInfo() {
     rating: trySelectors(selectors.rating),
     reviewCount,
     sold: trySelectors(selectors.sold),
-    shopName: trySelectors(selectors.shopName),
+    shopName: shopNameOverride !== null ? shopNameOverride : extractShopNameSync(),
     variants: extractVariants(),
     capturedAt: new Date().toLocaleString("vi-VN"),
   };
+}
+
+// Async version — chờ shopName render rồi mới trả về
+async function extractProductInfoAsync() {
+  const shopName = await extractShopNameAsync();
+  return extractProductInfo(shopName);
 }
 
 // Chụp full-page bằng cách cuộn + capture từng đoạn
@@ -395,7 +443,7 @@ async function captureFullPage() {
 
       const widget = document.getElementById("shopbot-root");
       if (widget) widget.style.opacity = "0";
-      await sleep(50); // Ensure the browser has painted the hidden state
+      await sleep(50);
 
       const dataUrl = await new Promise((resolve) => {
         chrome.runtime.sendMessage({ action: "capture_tab" }, resolve);
@@ -439,7 +487,8 @@ async function captureFullPage() {
       status: "Trích xuất thông tin...",
     });
 
-    const productInfo = extractProductInfo();
+    // Dùng async version để đảm bảo shopName đã render
+    const productInfo = await extractProductInfoAsync();
 
     chrome.runtime.sendMessage({
       action: "capture_progress",
